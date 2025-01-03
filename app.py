@@ -30,6 +30,7 @@ def home():
 
 
 
+
 @app.route('/add_task', methods=['POST'])
 def add_task():
     global tasks
@@ -62,6 +63,33 @@ def add_task():
     save_data(data_file, tasks)
     print(f"Task '{task_name}' added successfully!")
     return jsonify({"message": "Task added successfully!", "tasks": tasks})
+
+
+
+
+
+@app.route('/remove_task', methods=['POST'])
+def remove_task():
+    global tasks
+    task_name = request.json.get('task')
+
+    # Validate input
+    if not task_name:
+        return jsonify({"error": "Task name is required!"}), 400
+
+    if task_name not in tasks:
+        return jsonify({"error": "Task not found!"}), 400
+
+    # Remove the task
+    tasks = [task for task in tasks if task != task_name]
+    save_data(data_file, tasks)  # Save updated tasks to file
+
+    return jsonify({"message": f"Task '{task_name}' removed successfully!"})
+
+
+
+
+
 
 
 

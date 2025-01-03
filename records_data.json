@@ -14,5 +14,85 @@
         "end": "04:48 AM",
         "duration": "0:00:06.577462",
         "duration_decimal": 0.0
+    },
+    {
+        "task": "Book",
+        "date": "2025-01-03",
+        "begin": "05:20 AM",
+        "end": "05:20 AM",
+        "duration": "0:00:03.828702",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "Machine Learning",
+        "date": "2025-01-03",
+        "begin": "05:32 AM",
+        "end": "05:32 AM",
+        "duration": "0:00:02.996732",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "Research",
+        "date": "2025-01-03",
+        "begin": "05:53 AM",
+        "end": "05:53 AM",
+        "duration": "0:00:02.043831",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "Research",
+        "date": "2025-01-03",
+        "begin": "05:56 AM",
+        "end": "05:57 AM",
+        "duration": "0:01:04.849123",
+        "duration_decimal": 0.02
+    },
+    {
+        "task": "Book",
+        "date": "2025-01-03",
+        "begin": "05:57 AM",
+        "end": "05:58 AM",
+        "duration": "0:00:19.230044",
+        "duration_decimal": 0.01
+    },
+    {
+        "task": "Research",
+        "date": "2025-01-03",
+        "begin": "06:00 AM",
+        "end": "06:01 AM",
+        "duration": "0:00:10.831578",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "Book",
+        "date": "2025-01-03",
+        "begin": "06:01 AM",
+        "end": "06:01 AM",
+        "duration": "0:00:04.584192",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "Research",
+        "date": "2025-01-03",
+        "begin": "06:02 AM",
+        "end": "06:02 AM",
+        "duration": "0:00:08.549702",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "Book",
+        "date": "2025-01-03",
+        "begin": "06:02 AM",
+        "end": "06:03 AM",
+        "duration": "0:00:07.236984",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "Research",
+        "date": "2025-01-03",
+        "begin": "03:24 PM",
+        "end": "03:24 PM",
+        "duration": "0:00:09.999691",
+        "duration_decimal": 0.0
     }
 ]

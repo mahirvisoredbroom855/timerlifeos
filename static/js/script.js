@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeTaskBtn = document.getElementById('remove-task-btn');
 
     // Fetch tasks and populate the task list
-    // Function to load tasks from the server
+    // Fetch tasks and populate the task list
     function loadTasks() {
         fetch('/')
             .then(response => response.text())
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Task name cannot be empty!');
             return;
         }
-    
+
         fetch('/add_task', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -105,8 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => console.error('Error adding task:', error));
+
+            console.log('Add Task button clicked');
     });
-    
+
 
 
     // Remove task event
@@ -116,9 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('No task selected to remove!');
             return;
         }
-
+    
         const taskName = selectedTask.textContent;
-
+    
         fetch('/remove_task', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

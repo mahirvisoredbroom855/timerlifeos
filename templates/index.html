@@ -3,55 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Timer</title>
+    <title>Task Timer LifeOS Mahir & Nabiha</title>
     <style>
+        /* General Styles */
         body {
             font-family: 'Avenir', sans-serif;
             background: linear-gradient(to bottom, #5CB1D9, #A1D9D0);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             margin: 0;
-            flex-direction: column;
+            padding: 20px;
             text-align: center;
-            overflow-y: auto;
+            color: #333;
         }
 
+        /* Page Title */
         .page-title {
             font-size: 4.2rem;
-            color: #d7e5f3;
+            color: #ffffff;
             font-weight: bold;
-            margin-top: 35px;
-            margin-bottom: 20px;
-            padding: 10px 30px;
+            margin: 20px 0;
+            padding: 15px 40px;
             background: linear-gradient(to right, #0069d9, #004085);
             border-radius: 25px;
-            box-shadow: 0 4px 10px rgba(0, 105, 217, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 105, 217, 0.4);
+            width: fit-content;
         }
 
+        /* Branding */
+        .branding {
+            font-size: 1.4rem;
+            color: #004085;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        /* Container */
         .container {
-            padding-top: 15px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
+        /* Task Entry */
         .task-entry {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
             margin: 20px 0;
+            align-items: center;
+            width: 100%;
         }
 
         .task-entry input {
-            padding: 10px;
+            padding: 15px;
             font-size: 1rem;
-            border-radius: 5px;
             border: 1px solid #ccc;
-            margin-right: 10px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            transition: border-color 0.3s;
+        }
+
+        .task-entry input:focus {
+            border-color: #0069d9;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 105, 217, 0.3);
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 15px 25px;
             font-size: 1rem;
             font-weight: bold;
             color: white;
             background-color: #0069d9;
+            margin-top: 10px;
             border: none;
             border-radius: 25px;
             cursor: pointer;
@@ -63,86 +99,148 @@
             transform: scale(1.05);
         }
 
-        .task-list, .records-list {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-
-        .task-list li, .records-list li {
-            padding: 10px;
-            background-color: #fff;
-            margin: 5px 0;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .records-section {
-            margin-top: 20px;
-        }
-
-        select {
-            padding: 10px;
-            font-size: 1rem;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        .task-list li.selected {
-            background-color: #0069d9;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Additional Red Themed CSS for Remove Button */
         .btn-remove {
-            padding: 10px 20px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: white;
-            background-color: #d9534f; /* Red Theme */
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
+            background-color: #d9534f;
         }
 
         .btn-remove:hover {
             background-color: #c9302c;
-            transform: scale(1.05);
         }
 
-        .btn-remove:disabled {
-            background-color: #f7c6c5;
-            cursor: not-allowed;
+        /* Task List */
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .task-list li {
+            padding: 10px;
+            margin-top: 4px;
+            background-color: #f8f9fa;
+            margin: 8px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .task-list li:hover {
+            background-color: #0069d9;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .task-list li.selected {
+            background-color: #004085;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Timer Running Indicator */
+        .timer-indicator {
+            display: none;
+            background-color: #ff4d4d;
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 6px 12px rgba(255, 0, 0, 0.4);
+            margin: 20px 0;
+        }
+
+        .timer-indicator.active {
+            display: block;
+        }
+
+        /* Timer Display */
+        #timer-display {
+            font-size: 3rem;
+            color: #333;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        /* Records Section */
+        .records-section {
+            text-align: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .records-section h2 {
+            font-size: 1.5rem;
+            color: #0069d9;
+            margin-bottom: 15px;
+        }
+
+        .records-section select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            max-width: 200px;
+            margin-top: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .task-entry {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 20px;
+            }
         }
 
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="page-title">Task Timer</h1>
+        <h1 class="page-title">Task Timer LifeOS</h1>
+    <p class="branding">Shahriyar Ahmed Mahir & Nabiha Jannat Kalam</p>
 
-        <div class="task-entry">
-            <input type="text" id="task-input" placeholder="Enter a task" />
-            <button id="add-task-btn" class="btn">Add Task</button>
-            <button id="remove-task-btn" class="btn btn-remove" disabled>Remove Task</button>
+    <div class="container">
+
+        <div class="timer-controls">
+            <button id="start-timer-btn" class="btn">Start Timer</button>
         </div>
+
+        <div class="timer-controls">
+            <button id="stop-timer-btn" class="btn">Stop Timer</button>
+        </div>
+
+        <div id="timer-indicator" class="timer-indicator">Timer Running</div>
+
+        <div id="timer-display">00:00:00</div>
+        
+
 
         <ul id="task-list" class="task-list">
             {% for task in tasks %}
                 <li>{{ task }}</li>
             {% endfor %}
         </ul>
+            <!-- Tasks will be dynamically added here -->
+        </ul>
 
-        <!-- Hidden tasks data -->
         
 
-        
-
-        <div class="timer-controls">
-            <button id="start-timer-btn" class="btn">Start Timer</button>
-            <button id="stop-timer-btn" class="btn">Stop Timer</button>
+        <div class="task-entry">
+            <input type="text" id="task-input" placeholder="Enter a task" />
+            <button id="add-task-btn" class="btn">Add Task</button>
+            <button id="remove-task-btn" class="btn btn-remove" disabled>Remove Task</button>
         </div>
 
         <div class="records-section">
@@ -156,8 +254,57 @@
             </select>
         </div>
 
+        
+
+        <ul id="records-list" class="records-list">
+            <!-- Records will be dynamically added here -->
+        </ul>
+    </div>
+
         <ul id="records-list" class="records-list"></ul>
     </div>
+    
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startTimerBtn = document.getElementById('start-timer-btn');
+            const stopTimerBtn = document.getElementById('stop-timer-btn');
+            const timerIndicator = document.getElementById('timer-indicator');
+            const timerDisplay = document.getElementById('timer-display');
+
+            let timerInterval;
+            let secondsElapsed = 0;
+
+            function formatTime(seconds) {
+                const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+                const secs = String(seconds % 60).padStart(2, '0');
+                return `${hrs}:${mins}:${secs}`;
+            }
+
+            function startTimer() {
+                timerIndicator.classList.add('active');
+                timerInterval = setInterval(() => {
+                    secondsElapsed++;
+                    timerDisplay.textContent = formatTime(secondsElapsed);
+                }, 1000);
+            }
+
+            function stopTimer() {
+                timerIndicator.classList.remove('active');
+                clearInterval(timerInterval);
+                timerInterval = null;
+                secondsElapsed = 0; // Reset timer
+                timerDisplay.textContent = formatTime(secondsElapsed); // Update display
+            }
+
+            startTimerBtn.addEventListener('click', startTimer);
+            stopTimerBtn.addEventListener('click', stopTimer);
+        });
+    </script>
+
+
 
     <script src="/static/js/script.js"></script>
     <script>
