@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Timer</title>
+    <style>
+        body {
+            font-family: 'Avenir', sans-serif;
+            background: linear-gradient(to bottom, #5CB1D9, #A1D9D0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 4.2rem;
+            color: #d7e5f3;
+            font-weight: bold;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            padding: 10px 30px;
+            background: linear-gradient(to right, #0069d9, #004085);
+            border-radius: 25px;
+            box-shadow: 0 4px 10px rgba(0, 105, 217, 0.3);
+        }
+
+        .container {
+            padding-top: 15px;
+        }
+
+        .task-entry {
+            margin: 20px 0;
+        }
+
+        .task-entry input {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            background-color: #0069d9;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #004085;
+            transform: scale(1.05);
+        }
+
+        .task-list, .records-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .task-list li, .records-list li {
+            padding: 10px;
+            background-color: #fff;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .records-section {
+            margin-top: 20px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .task-list li.selected {
+            background-color: #0069d9;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Additional Red Themed CSS for Remove Button */
+        .btn-remove {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            background-color: #d9534f; /* Red Theme */
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn-remove:hover {
+            background-color: #c9302c;
+            transform: scale(1.05);
+        }
+
+        .btn-remove:disabled {
+            background-color: #f7c6c5;
+            cursor: not-allowed;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Task Timer</h1>
+
+        <div class="task-entry">
+            <input type="text" id="task-input" placeholder="Enter a task" />
+            <button id="add-task-btn" class="btn">Add Task</button>
+            <button id="remove-task-btn" class="btn btn-remove" disabled>Remove Task</button>
+        </div>
+
+        <ul id="task-list" class="task-list">
+            {% for task in tasks %}
+                <li>{{ task }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Hidden tasks data -->
+        
+
+        
+
+        <div class="timer-controls">
+            <button id="start-timer-btn" class="btn">Start Timer</button>
+            <button id="stop-timer-btn" class="btn">Stop Timer</button>
+        </div>
+
+        <div class="records-section">
+            <h2>Records</h2>
+            <button id="view-records-btn" class="btn">View Records</button>
+            <button id="export-records-btn" class="btn">Export Records</button>
+            <select id="export-period">
+                <option value="all">All</option>
+                <option value="week">Last Week</option>
+                <option value="month">Last Month</option>
+            </select>
+        </div>
+
+        <ul id="records-list" class="records-list"></ul>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskInput = document.getElementById('task-input');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const removeTaskBtn = document.getElementById('remove-task-btn');
+            const taskList = document.getElementById('task-list');
+
+            // Function to load tasks from the server
+            function loadTasks() {
+                fetch('/')
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const tasksFromServer = Array.from(doc.querySelectorAll('#task-list li'))
+                            .map(li => li.textContent);
+
+                        // Clear existing tasks and populate the list
+                        taskList.innerHTML = '';
+                        tasksFromServer.forEach(task => {
+                            const li = document.createElement('li');
+                            li.textContent = task;
+
+                            // Add selection behavior
+                            li.addEventListener('click', () => {
+                                document.querySelectorAll('#task-list li').forEach(el => el.classList.remove('selected'));
+                                li.classList.add('selected');
+                                removeTaskBtn.disabled = false; // Enable remove button
+                            });
+
+                            taskList.appendChild(li);
+                        });
+                    })
+                    .catch(error => console.error('Error loading tasks:', error));
+            }
+
+            // Add task event
+            addTaskBtn.addEventListener('click', () => {
+                const taskName = taskInput.value.trim();
+                if (!taskName) {
+                    alert('Task name cannot be empty!');
+                    return;
+                }
+
+                fetch('/add_task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task: taskName })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            loadTasks(); // Reload tasks
+                            taskInput.value = ''; // Clear input field
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error adding task:', error));
+            });
+
+            // Remove task event
+            removeTaskBtn.addEventListener('click', () => {
+                const selectedTask = document.querySelector('#task-list li.selected');
+                if (!selectedTask) {
+                    alert('No task selected to remove!');
+                    return;
+                }
+
+                const taskName = selectedTask.textContent;
+
+                fetch('/remove_task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task: taskName })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            loadTasks(); // Reload tasks
+                            removeTaskBtn.disabled = true; // Disable remove button
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error removing task:', error));
+            });
+
+            // Initial load of tasks
+            loadTasks();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+[
+    {
+        "task": "lm",
+        "date": "2025-01-03",
+        "begin": "04:25 AM",
+        "end": "04:25 AM",
+        "duration": "0:00:01.712542",
+        "duration_decimal": 0.0
+    },
+    {
+        "task": "mAHIR",
+        "date": "2025-01-03",
+        "begin": "04:47 AM",
+        "end": "04:48 AM",
+        "duration": "0:00:06.577462",
+        "duration_decimal": 0.0
+    }
+]
