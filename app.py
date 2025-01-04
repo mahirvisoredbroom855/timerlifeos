@@ -1,41 +1,102 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import json
 import os
 from datetime import datetime, timedelta
 
+
+
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Needed for session handling
+
+# Hardcoded user credentials
+USER_CREDENTIALS = {
+    "admin": "password123",
+    "mahir": "2006",
+}
 
 # File paths
-data_file = "tasks_data.json"
+
 records_file = "records_data.json"
 
-# Load tasks and records
+
+
+# Helper function to get the user-specific task file path
+def get_user_task_file():
+    username = session.get('username')
+    if username:
+        return f"tasks_{username}.json"
+    return None
+
+# Load data from a file
 def load_data(file_path):
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
             return json.load(f)
     return []
 
+# Save data to a file
 def save_data(file_path, data):
     with open(file_path, "w") as f:
         json.dump(data, f, indent=4)
 
-tasks = load_data(data_file)
-records = load_data(records_file)
+
+
 
 @app.route('/')
 def home():
-    print(tasks)  # Debug
-    return render_template('index.html', tasks=tasks)
+    # Redirect to login if the user is not logged in
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Load user-specific tasks
+    task_file = get_user_task_file()
+    tasks = load_data(task_file)
+    return render_template('index.html', tasks=tasks, username=session['username'])
+
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Check if credentials are valid
+        if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
+            session['username'] = username  # Save username in session
+
+            # Create user-specific task file if it doesn't exist
+            task_file = get_user_task_file()
+            if not os.path.exists(task_file):
+                save_data(task_file, [])  # Initialize with an empty task list
+
+            return redirect(url_for('home'))
+        else:
+            return render_template('login.html', error="Invalid username or password.")
+    return render_template('login.html')
+
+
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)  # Remove username from session
+    return redirect(url_for('login'))
+
+
 
 
 
 
 @app.route('/add_task', methods=['POST'])
 def add_task():
-    global tasks
-    # Reload tasks to ensure the latest state
-    tasks = load_data(data_file)
+    # Ensure the user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "Unauthorized access!"}), 403
+
+    # Load user-specific tasks
+    task_file = get_user_task_file()
+    tasks = load_data(task_file)
 
     task_name = request.json.get('task')
 
@@ -46,31 +107,26 @@ def add_task():
     # Normalize task name for consistent comparison
     normalized_task_name = task_name.strip().lower()
 
-    # Ensure tasks are normalized for comparison
-    normalized_tasks = [task.strip().lower() for task in tasks]
-
-    # Debugging logs
-    print(f"Task to add (normalized): '{normalized_task_name}'")
-    print(f"Existing tasks (normalized): {normalized_tasks}")
-
     # Check for duplicates
-    if normalized_task_name in normalized_tasks:
-        print("Duplicate detected!")
+    if normalized_task_name in [task.strip().lower() for task in tasks]:
         return jsonify({"error": "Task already exists."}), 400
 
     # Add the task if no duplicates are found
     tasks.append(task_name.strip())
-    save_data(data_file, tasks)
-    print(f"Task '{task_name}' added successfully!")
+    save_data(task_file, tasks)
     return jsonify({"message": "Task added successfully!", "tasks": tasks})
-
-
-
 
 
 @app.route('/remove_task', methods=['POST'])
 def remove_task():
-    global tasks
+    # Ensure the user is logged in
+    if 'username' not in session:
+        return jsonify({"error": "Unauthorized access!"}), 403
+
+    # Load user-specific tasks
+    task_file = get_user_task_file()
+    tasks = load_data(task_file)
+
     task_name = request.json.get('task')
 
     # Validate input
@@ -82,9 +138,12 @@ def remove_task():
 
     # Remove the task
     tasks = [task for task in tasks if task != task_name]
-    save_data(data_file, tasks)  # Save updated tasks to file
+    save_data(task_file, tasks)
 
     return jsonify({"message": f"Task '{task_name}' removed successfully!"})
+
+
+
 
 
 

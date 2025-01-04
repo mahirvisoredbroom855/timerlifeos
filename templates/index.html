@@ -261,7 +261,6 @@
         </ul>
     </div>
 
-        <ul id="records-list" class="records-list"></ul>
     </div>
     
 
@@ -307,98 +306,6 @@
 
 
     <script src="/static/js/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const taskInput = document.getElementById('task-input');
-            const addTaskBtn = document.getElementById('add-task-btn');
-            const removeTaskBtn = document.getElementById('remove-task-btn');
-            const taskList = document.getElementById('task-list');
-
-            // Function to load tasks from the server
-            function loadTasks() {
-                fetch('/')
-                    .then(response => response.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const tasksFromServer = Array.from(doc.querySelectorAll('#task-list li'))
-                            .map(li => li.textContent);
-
-                        // Clear existing tasks and populate the list
-                        taskList.innerHTML = '';
-                        tasksFromServer.forEach(task => {
-                            const li = document.createElement('li');
-                            li.textContent = task;
-
-                            // Add selection behavior
-                            li.addEventListener('click', () => {
-                                document.querySelectorAll('#task-list li').forEach(el => el.classList.remove('selected'));
-                                li.classList.add('selected');
-                                removeTaskBtn.disabled = false; // Enable remove button
-                            });
-
-                            taskList.appendChild(li);
-                        });
-                    })
-                    .catch(error => console.error('Error loading tasks:', error));
-            }
-
-            // Add task event
-            addTaskBtn.addEventListener('click', () => {
-                const taskName = taskInput.value.trim();
-                if (!taskName) {
-                    alert('Task name cannot be empty!');
-                    return;
-                }
-
-                fetch('/add_task', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ task: taskName })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            loadTasks(); // Reload tasks
-                            taskInput.value = ''; // Clear input field
-                        } else {
-                            alert(data.error);
-                        }
-                    })
-                    .catch(error => console.error('Error adding task:', error));
-            });
-
-            // Remove task event
-            removeTaskBtn.addEventListener('click', () => {
-                const selectedTask = document.querySelector('#task-list li.selected');
-                if (!selectedTask) {
-                    alert('No task selected to remove!');
-                    return;
-                }
-
-                const taskName = selectedTask.textContent;
-
-                fetch('/remove_task', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ task: taskName })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            loadTasks(); // Reload tasks
-                            removeTaskBtn.disabled = true; // Disable remove button
-                        } else {
-                            alert(data.error);
-                        }
-                    })
-                    .catch(error => console.error('Error removing task:', error));
-            });
-
-            // Initial load of tasks
-            loadTasks();
-        });
-    </script>
 </body>
 
 </html>

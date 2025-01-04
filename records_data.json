@@ -170,5 +170,22 @@
         "notes": "",
         "rate": 0,
         "sum": 0
+    },
+    {
+        "unix_begin": 1736017877,
+        "unix_end": 1736017879,
+        "date": "2025-01-04",
+        "begin": "02:11 PM",
+        "end": "02:11 PM",
+        "folder": "",
+        "task": "Research",
+        "duration": "0:00:02",
+        "duration_decimal": 0.0,
+        "rounding_to": 0,
+        "rounding_method": "nearest",
+        "original_end": "02:11 PM",
+        "notes": "",
+        "rate": 0,
+        "sum": 0
     }
 ]

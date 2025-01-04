@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* General Styles for the Login Page */
+        body {
+            font-family: 'Avenir', sans-serif;
+            background: linear-gradient(to bottom, #5CB1D9, #A1D9D0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        /* Main Container to hold everything */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* External Heading */
+        .external-heading {
+            font-size: 3rem;
+            color: #ffffff;
+            font-weight: bold;
+            margin-bottom: 40px;
+            padding: 20px 60px;
+            background: linear-gradient(to right, #0069d9, #004085);
+            border-radius: 25px;
+            box-shadow: 0 6px 12px rgba(0, 105, 217, 0.4);
+            text-align: center;
+            width: fit-content;
+            margin-top: 20px;
+        }
+
+        /* Login Container */
+        .login-container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Login Title */
+        .login-title {
+            font-size: 2.5rem;
+            color: #ffffff;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px 40px;
+            background: linear-gradient(to right, #0069d9, #004085);
+            border-radius: 25px;
+            box-shadow: 0 6px 12px rgba(0, 105, 217, 0.4);
+        }
+
+        /* Input Field */
+        .input-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input-container input {
+            padding: 15px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 350px;
+            transition: border-color 0.3s;
+        }
+
+        .input-container input:focus {
+            border-color: #0069d9;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 105, 217, 0.3);
+        }
+
+        /* Button */
+        .btn {
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            background-color: #0069d9;
+            margin-top: 10px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .btn:hover {
+            background-color: #004085;
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .external-heading {
+                font-size: 2.5rem;
+            }
+
+            .login-title {
+                font-size: 2rem;
+            }
+
+            .login-container {
+                padding: 25px;
+                max-width: 100%;
+            }
+        }
+
+    </style>  <!-- Link to your main CSS -->
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="external-heading">Task Timer LifeOS</h1>
+        <div class="login-container">
+            <h2 class="login-title">Login</h2>
+            <form method="POST" action="/login">
+                <div class="input-container">
+                    <input type="text" name="username" placeholder="Username" required>
+                </div>
+                <div class="input-container">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

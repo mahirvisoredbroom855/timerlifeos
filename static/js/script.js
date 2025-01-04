@@ -1,90 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task-btn');
+    const removeTaskBtn = document.getElementById('remove-task-btn');
     const taskList = document.getElementById('task-list');
     const startTimerBtn = document.getElementById('start-timer-btn');
     const stopTimerBtn = document.getElementById('stop-timer-btn');
     const viewRecordsBtn = document.getElementById('view-records-btn');
     const exportRecordsBtn = document.getElementById('export-records-btn');
-    const recordsList = document.getElementById('records-list');
     const exportPeriod = document.getElementById('export-period');
-    const removeTaskBtn = document.getElementById('remove-task-btn');
+    const recordsList = document.getElementById('records-list');
 
-    // Fetch tasks and populate the task list
-    // Fetch tasks and populate the task list
+    let selectedTask = null;
+
+    // Load tasks from server
     function loadTasks() {
         fetch('/')
             .then(response => response.text())
             .then(html => {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                const tasksFromServer = Array.from(doc.querySelectorAll('#task-list li'))
-                    .map(li => li.textContent);
+                const tasksFromServer = Array.from(doc.querySelectorAll('#task-list li')).map(li => li.textContent);
 
-                // Clear existing tasks and populate the list
                 taskList.innerHTML = '';
                 tasksFromServer.forEach(task => {
                     const li = document.createElement('li');
                     li.textContent = task;
-
-                    // Add selection behavior
-                    li.addEventListener('click', () => {
-                        document.querySelectorAll('#task-list li').forEach(el => el.classList.remove('selected'));
-                        li.classList.add('selected');
-                    });
-
+                    li.addEventListener('click', () => selectTask(li));
                     taskList.appendChild(li);
                 });
             })
             .catch(error => console.error('Error loading tasks:', error));
     }
 
-
-    
-
-    function addTask(taskName) {
-        fetch('/add_task', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ task: taskName })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    loadTasks();
-                    document.getElementById('task-input').value = '';
-                } else {
-                    alert(data.error);
-                }
-            });
+    // Select a task
+    function selectTask(taskElement) {
+        if (selectedTask) selectedTask.classList.remove('selected');
+        selectedTask = taskElement;
+        selectedTask.classList.add('selected');
+        removeTaskBtn.disabled = false;
     }
-    
-    function viewRecords() {
-        fetch('/view_records')
-            .then(response => response.json())
-            .then(data => {
-                const recordsList = document.getElementById('records-list');
-                recordsList.innerHTML = ''; // Clear records list
-                data.forEach(record => {
-                    const li = document.createElement('li');
-                    li.textContent = `${record.task} - ${record.date} (${record.begin} to ${record.end})`;
-                    recordsList.appendChild(li);
-                });
-            });
-    }
-
-
-    document.getElementById('add-task-btn').addEventListener('click', () => {
-        const taskInput = document.getElementById('task-input').value;
-        if (taskInput) addTask(taskInput);
-    });
-    
-    document.getElementById('view-records-btn').addEventListener('click', viewRecords);
 
     // Add a new task
-    // Add task event
     addTaskBtn.addEventListener('click', () => {
-        const taskName = taskInput.value.trim(); // Normalize input
+        const taskName = taskInput.value.trim();
         if (!taskName) {
             alert('Task name cannot be empty!');
             return;
@@ -93,44 +51,39 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/add_task', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ task: taskName })
+            body: JSON.stringify({ task: taskName }),
         })
             .then(response => response.json())
             .then(data => {
                 if (data.message) {
-                    loadTasks(); // Reload tasks
-                    taskInput.value = ''; // Clear input field
+                    loadTasks();
+                    taskInput.value = '';
                 } else {
                     alert(data.error);
                 }
             })
             .catch(error => console.error('Error adding task:', error));
-
-            console.log('Add Task button clicked');
     });
 
-
-
-    // Remove task event
+    // Remove a task
     removeTaskBtn.addEventListener('click', () => {
-        const selectedTask = document.querySelector('#task-list li.selected');
         if (!selectedTask) {
             alert('No task selected to remove!');
             return;
         }
-    
+
         const taskName = selectedTask.textContent;
-    
+
         fetch('/remove_task', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ task: taskName })
+            body: JSON.stringify({ task: taskName }),
         })
             .then(response => response.json())
             .then(data => {
                 if (data.message) {
-                    loadTasks(); // Reload tasks
-                    removeTaskBtn.disabled = true; // Disable remove button
+                    loadTasks();
+                    removeTaskBtn.disabled = true;
                 } else {
                     alert(data.error);
                 }
@@ -138,10 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error removing task:', error));
     });
 
-
     // Start timer
     startTimerBtn.addEventListener('click', () => {
-        const selectedTask = document.querySelector('#task-list li.selected');
         if (!selectedTask) {
             alert('Please select a task to start the timer.');
             return;
@@ -152,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/start_timer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ task: taskName })
+            body: JSON.stringify({ task: taskName }),
         })
             .then(response => response.json())
             .then(data => {
@@ -171,7 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 alert(data.message || data.error);
-            });
+            })
+            .catch(error => console.error('Error stopping timer:', error));
     });
 
     // View records
@@ -185,7 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.textContent = `${record.task} - ${record.date} (${record.begin} to ${record.end})`;
                     recordsList.appendChild(li);
                 });
-            });
+            })
+            .catch(error => console.error('Error viewing records:', error));
     });
 
     // Export records
@@ -195,13 +148,15 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/export_records', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ period })
+            body: JSON.stringify({ period }),
         })
             .then(response => {
                 if (response.ok) {
                     return response.blob();
                 } else {
-                    return response.json().then(data => { throw new Error(data.error); });
+                    return response.json().then(data => {
+                        throw new Error(data.error);
+                    });
                 }
             })
             .then(blob => {
@@ -216,13 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => alert(error.message));
     });
 
-    // Task selection
-    taskList.addEventListener('click', event => {
-        const items = document.querySelectorAll('#task-list li');
-        items.forEach(item => item.classList.remove('selected'));
-        event.target.classList.add('selected');
-    });
-
-    // Initialize tasks
+    // Initialize
     loadTasks();
 });

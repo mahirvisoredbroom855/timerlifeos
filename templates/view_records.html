@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Records</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your existing CSS file -->
+    <style>
+        /* Additional styling for the view records page */
+        body {
+            font-family: 'Avenir', sans-serif;
+            background: linear-gradient(to bottom, #5CB1D9, #A1D9D0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #004085;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        table {
+            width: 80%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #0069d9;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #0069d9;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Adding a hover effect for table rows */
+        tr:hover {
+            background-color: #a1bdda;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive table styling */
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+
+            th, td {
+                font-size: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>
+        Timing Records For 
+        {% if session['username'] == 'mahir' %}
+            Shahriyar Ahmed Mahir
+        {% elif session['username'] == 'nabiha' %}
+            Nabiha Jannat Kalam
+        {% else %}
+            {{ session['username'] }}
+        {% endif %}
+    </h1>  <!-- Display username dynamically -->
+    <table>
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.task }}</td>
+                <td>{{ record.begin }}</td>
+                <td>{{ record.end }}</td>
+                <td>{{ record.duration }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
