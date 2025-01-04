@@ -145,5 +145,30 @@
         "notes": "",
         "rate": 0,
         "sum": 0
+    },
+    {
+        "task": "Research",
+        "date": "2025-01-04",
+        "begin": "03:21 AM",
+        "end": "03:21 AM",
+        "duration": "0:00:05.418855",
+        "duration_decimal": 0.0
+    },
+    {
+        "unix_begin": 1735979220,
+        "unix_end": 1735979223,
+        "date": "2025-01-04",
+        "begin": "03:27 AM",
+        "end": "03:27 AM",
+        "folder": "",
+        "task": "Book",
+        "duration": "0:00:03",
+        "duration_decimal": 0.0,
+        "rounding_to": 0,
+        "rounding_method": "nearest",
+        "original_end": "03:27 AM",
+        "notes": "",
+        "rate": 0,
+        "sum": 0
     }
 ]
