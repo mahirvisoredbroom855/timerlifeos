@@ -222,15 +222,12 @@
         </div>
 
         <div id="timer-indicator" class="timer-indicator">Timer Running</div>
-
         <div id="timer-display">00:00:00</div>
         
 
 
         <ul id="task-list" class="task-list">
-            {% for task in tasks %}
-                <li>{{ task }}</li>
-            {% endfor %}
+            
         </ul>
             <!-- Tasks will be dynamically added here -->
         </ul>
@@ -267,11 +264,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const taskInput = document.getElementById('task-input');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const removeTaskBtn = document.getElementById('remove-task-btn');
+            const taskList = document.getElementById('task-list');
             const startTimerBtn = document.getElementById('start-timer-btn');
             const stopTimerBtn = document.getElementById('stop-timer-btn');
             const timerIndicator = document.getElementById('timer-indicator');
             const timerDisplay = document.getElementById('timer-display');
+            const viewRecordsBtn = document.getElementById('view-records-btn');
+            const exportRecordsBtn = document.getElementById('export-records-btn');
+            const exportPeriod = document.getElementById('export-period');
+            const recordsList = document.getElementById('records-list');
 
+            let selectedTask = null;
             let timerInterval;
             let secondsElapsed = 0;
 
@@ -282,30 +288,191 @@
                 return `${hrs}:${mins}:${secs}`;
             }
 
-            function startTimer() {
-                timerIndicator.classList.add('active');
-                timerInterval = setInterval(() => {
-                    secondsElapsed++;
+            // Load tasks from the server in JSON format
+            function loadTasks() {
+                fetch('/load_tasks')
+                    .then(response => response.json())
+                    .then(data => {
+                        taskList.innerHTML = '';
+                        data.tasks.forEach(task => {
+                            const li = document.createElement('li');
+                            li.textContent = task;
+                            li.addEventListener('click', () => selectTask(li));
+                            taskList.appendChild(li);
+                        });
+                    })
+                    .catch(error => console.error('Error loading tasks:', error));
+            }
+
+            // Select a task
+            function selectTask(taskElement) {
+                if (selectedTask) selectedTask.classList.remove('selected');
+                selectedTask = taskElement;
+                selectedTask.classList.add('selected');
+                removeTaskBtn.disabled = false;
+            }
+
+            // Add a new task
+            addTaskBtn.addEventListener('click', () => {
+                const taskName = taskInput.value.trim();
+                if (!taskName) {
+                    alert('Task name cannot be empty!');
+                    return;
+                }
+
+                fetch('/add_task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task: taskName }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            loadTasks();
+                            taskInput.value = '';
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error adding task:', error));
+            });
+
+            // Remove a task
+            removeTaskBtn.addEventListener('click', () => {
+                if (!selectedTask) {
+                    alert('No task selected to remove!');
+                    return;
+                }
+
+                const taskName = selectedTask.textContent;
+
+                fetch('/remove_task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task: taskName }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            loadTasks();
+                            removeTaskBtn.disabled = true;
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error removing task:', error));
+            });
+
+            // Start timer
+            startTimerBtn.addEventListener('click', () => {
+                if (!selectedTask) {
+                    alert('Please select a task to start the timer.');
+                    return;
+                }
+
+                const taskName = selectedTask.textContent;
+
+                fetch('/start_timer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task: taskName }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert(data.message);
+                            timerIndicator.classList.add('active');
+                            timerInterval = setInterval(() => {
+                                secondsElapsed++;
+                                timerDisplay.textContent = formatTime(secondsElapsed);
+                            }, 1000);
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error starting timer:', error));
+            });
+
+            // Stop timer
+            stopTimerBtn.addEventListener('click', () => {
+                fetch('/stop_timer', { 
+                    method: 'POST' 
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || data.error);
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    secondsElapsed = 0;
                     timerDisplay.textContent = formatTime(secondsElapsed);
-                }, 1000);
-            }
+                    timerIndicator.classList.remove('active');
+                })
+                .catch(error => {
+                    console.error('Error stopping timer:', error);
+                    alert('Error stopping timer: ' + error.message);
+                });
+            });
 
-            function stopTimer() {
-                timerIndicator.classList.remove('active');
-                clearInterval(timerInterval);
-                timerInterval = null;
-                secondsElapsed = 0; // Reset timer
-                timerDisplay.textContent = formatTime(secondsElapsed); // Update display
-            }
 
-            startTimerBtn.addEventListener('click', startTimer);
-            stopTimerBtn.addEventListener('click', stopTimer);
+
+
+
+
+
+            // View records
+            viewRecordsBtn.addEventListener('click', () => {
+                fetch('/view_records')
+                    .then(response => response.json())
+                    .then(data => {
+                        recordsList.innerHTML = '';
+                        data.forEach(record => {
+                            const li = document.createElement('li');
+                            li.textContent = `${record.task} - ${record.date} (${record.begin} to ${record.end})`;
+                            recordsList.appendChild(li);
+                        });
+                    })
+                    .catch(error => console.error('Error viewing records:', error));
+            });
+
+            // Export records
+            exportRecordsBtn.addEventListener('click', () => {
+                const period = exportPeriod.value;
+
+                fetch('/export_records', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ period }),
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.blob();
+                        } else {
+                            return response.json().then(data => {
+                                throw new Error(data.error);
+                            });
+                        }
+                    })
+                    .then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'exported_records.json';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    })
+                    .catch(error => alert(error.message));
+            });
+
+            // Initialize
+            loadTasks();
         });
     </script>
-
-
-
-    <script src="/static/js/script.js"></script>
 </body>
 
 </html>
