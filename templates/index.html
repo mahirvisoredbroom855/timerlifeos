@@ -292,6 +292,15 @@
     
     <script>
         document.getElementById('export-records-btn').addEventListener('click', function() {
+            // Get the current date in YYYY-MM-DD format
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            // Get the username (assuming it's stored in a variable like `username`)
+            const username = "{{ username }}"; // You might want to pass this dynamically from your server side
+
+            // Create the dynamic filename
+            const filename = `${username}_records_${currentDate}.json`;
+            
             const period = document.getElementById('export-period').value;
             fetch('/export_records', {
                 method: 'POST',
@@ -303,7 +312,7 @@
                 // Trigger file download
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `exported_records.json`;
+                link.download = filename;
                 link.click();
             });
         });
