@@ -97,7 +97,9 @@
         {% else %}
             {{ session['username'] }}
         {% endif %}
-    </h1>  <!-- Display username dynamically -->
+    </h1>
+
+    
     <table>
         <thead>
             <tr>
@@ -105,6 +107,7 @@
                 <th>Start Time</th>
                 <th>End Time</th>
                 <th>Duration</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
@@ -114,10 +117,12 @@
                 <td>{{ record.begin }}</td>
                 <td>{{ record.end }}</td>
                 <td>{{ record.duration }}</td>
+                <td>{{ record.date }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    
 
 </body>
 </html>

@@ -185,6 +185,26 @@
             margin-top: 10px;
         }
 
+
+        /* Logout Button Style */
+        .logout-btn {
+            font-size: 1rem;
+            padding: 12px 20px;
+            color: #ffffff;
+            background-color: #d9534f;
+            margin-top: 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background-color: #c9302c;
+        }
+
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .page-title {
@@ -209,7 +229,13 @@
 <body>
     <div class="container">
         <h1 class="page-title">Task Timer LifeOS</h1>
-    <p class="branding">Shahriyar Ahmed Mahir & Nabiha Jannat Kalam</p>
+    <p class="branding">{% if username == 'mahir' %}
+        Welcome, Shahriyar Ahmed Mahir!
+    {% elif username == 'nabiha' %}
+        Welcome, Nabiha Jannat Kalam!
+    {% else %}
+        Welcome, {{ username }}!
+    {% endif %}</p>
 
     <div class="container">
 
@@ -242,7 +268,7 @@
 
         <div class="records-section">
             <h2>Records</h2>
-            <button id="view-records-btn" class="btn">View Records</button>
+            <a href="{{ url_for('view_records') }}" id="view-records-btn" class="btn" style="text-decoration: none;">View Records</a>
             <button id="export-records-btn" class="btn">Export Records</button>
             <select id="export-period">
                 <option value="all">All</option>
@@ -256,10 +282,32 @@
         <ul id="records-list" class="records-list">
             <!-- Records will be dynamically added here -->
         </ul>
+
+        <a style="text-decoration: none;" href="https://mahirvisoredbroom855.github.io/lifeoskpitracker/" class="btn">LifeOS KPI Tracker</a>
+
+        <a href="{{ request.url_root }}login" class="logout-btn">Logout</a>
     </div>
 
     </div>
     
+    <script>
+        document.getElementById('export-records-btn').addEventListener('click', function() {
+            const period = document.getElementById('export-period').value;
+            fetch('/export_records', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ period: period })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                // Trigger file download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `exported_records.json`;
+                link.click();
+            });
+        });
+    </script>
 
 
     <script>
@@ -461,7 +509,7 @@
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = 'exported_records.json';
+                        a.download = 'records.json';
                         document.body.appendChild(a);
                         a.click();
                         a.remove();

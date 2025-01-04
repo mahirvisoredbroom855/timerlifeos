@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # Needed for session handling
 
 # Hardcoded user credentials
 USER_CREDENTIALS = {
-    "admin": "password123",
+    "nabiha": "2007",
     "mahir": "2006",
 }
 
@@ -75,21 +75,15 @@ def load_user_records():
     user_file = get_user_records_file()
     if not user_file or not os.path.exists(user_file):
         return []  # Return an empty list if no records exist
-    user_data = load_data(user_file)
-    return user_data.get("records", [])
-
-
+    return load_data(user_file)  # Just return the list from the file
 
 # Save records for the user
 def save_user_records(records):
     user_file = get_user_records_file()  # Get the user-specific records file
     if not user_file:
         return
-    user_data = load_data(user_file)
-    if "records" not in user_data:
-        user_data["records"] = []  # Initialize if the records key is missing
-    user_data["records"] = records  # Update the records with the new data
-    save_data(user_file, user_data)  # Save the updated data to the file
+    save_data(user_file, records)  # Directly save the list of records
+
 
 
 
@@ -128,7 +122,7 @@ def login():
             # Create the records file if it doesn't exist
             records_file = f"records_{username}.json"
             if not os.path.exists(records_file):
-                save_data(records_file, {"records": []})  # Initialize with an empty records list
+                save_data(records_file, [])  # Initialize with an empty records list
 
             return redirect(url_for('home'))
         else:
@@ -198,11 +192,17 @@ def remove_task():
     return jsonify({"message": f"Task '{task_name}' removed successfully!"})
 
 
-# Route: View records for the user
 @app.route('/view_records', methods=['GET'])
 def view_records():
-    records = load_user_records()
-    return jsonify(records)
+    username = session.get('user')  # Get the logged-in username
+    if username:
+        records = load_user_records()  # Load records for the logged-in user
+        tasks = load_user_tasks()  # Load tasks for the logged-in user
+        return render_template('view_records.html', username=username, records=records, tasks=tasks)
+    else:
+        return redirect(url_for('login'))
+
+
 
 # Route: Alternative view of records
 @app.route('/alternative_records', methods=['GET'])
@@ -240,22 +240,23 @@ logging.basicConfig(level=logging.DEBUG)
 @app.route('/stop_timer', methods=['POST'])
 def stop_timer():
     global current_task, start_time
-
+    logging.debug(f"Attempting to stop timer for task: {current_task}")
+    
     # Ensure current_task and start_time are valid before proceeding
-    if current_task is None or start_time is None:
+    if not current_task or not start_time:
         return jsonify({"error": "No task is currently being timed."}), 400
-
+    
     # Calculate the time elapsed
     end_time = datetime.now()
     duration = (end_time - start_time).total_seconds()
-
+    
     # Convert times to UNIX timestamps
     unix_begin = int(start_time.timestamp())
     unix_end = int(end_time.timestamp())
-
+    
     # Format duration to a readable string
     duration_str = str(timedelta(seconds=round(duration)))
-
+    
     # Prepare the record data
     record = {
         "unix_begin": unix_begin,
@@ -274,17 +275,16 @@ def stop_timer():
         "rate": 0,
         "sum": 0
     }
-
-    # Load existing records, append the new record, and save
-    records = load_user_records()  # Load the current records
-    records.append(record)  # Append the new record
-    save_user_records(records)  # Save the updated list of records
-
+    
+    # Load existing records and add the new one
+    records = load_user_records()
+    records.append(record)
+    save_user_records(records)
+    
     # Clear the current task and start time
     current_task, start_time = None, None
-
+    
     return jsonify({"message": "Timer stopped and data recorded!", "records": records})
-
 
 
 
@@ -316,7 +316,7 @@ def export_records():
         if datetime.strptime(record["date"], "%Y-%m-%d") >= start_date
     ]
 
-    export_file = f"exported_records_{session['user']}.json"
+    export_file = f"records_{session['user']}.json"
     with open(export_file, "w") as f:
         json.dump(filtered_records, f, indent=4)
 
