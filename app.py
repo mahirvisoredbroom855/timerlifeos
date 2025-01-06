@@ -3,18 +3,40 @@ import json
 import os
 from datetime import datetime, timedelta
 from github import Github
-
-
+import logging
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Needed for session handling
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
 
+# Set the secret key for Flask sessions (make sure to set this securely)
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'fallback_secret_key')
+
+# Get GitHub token and repository name from environment variables
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_NAME = 'mahirvisoredbroom855/timerlifeos'
 
-github = Github(GITHUB_TOKEN)
-repo = github.get_repo(REPO_NAME)
+if not GITHUB_TOKEN:
+    logging.error("Error: GITHUB_TOKEN not set.")
+else:
+    try:
+        # Initialize GitHub API client
+        github = Github(GITHUB_TOKEN)
+        repo = github.get_repo(REPO_NAME)
+        logging.info(f"Successfully connected to repo: {repo.name}")
+
+        # Example: Get the list of files in the repository
+        contents = repo.get_contents("")
+        for content_file in contents:
+            logging.info(f"File name: {content_file.name}")
+
+    except Exception as e:
+        logging.error(f"Error connecting to GitHub: {e}")
+
+
+
+    
 
 
 # Hardcoded user credentials
