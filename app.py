@@ -2,11 +2,20 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import json
 import os
 from datetime import datetime, timedelta
+from github import Github
 
 
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for session handling
+
+
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+REPO_NAME = 'mahirvisoredbroom855/timerlifeos'
+
+github = Github(GITHUB_TOKEN)
+repo = github.get_repo(REPO_NAME)
+
 
 # Hardcoded user credentials
 USER_CREDENTIALS = {
@@ -204,11 +213,60 @@ def view_records():
 
 
 
+
 # Route: Alternative view of records
 @app.route('/alternative_records', methods=['GET'])
 def alternative_view_records():
     records = load_user_records()
     return jsonify({"message": "This is an alternative view of records.", "records": records})
+
+
+
+
+
+
+@app.route('/update_github_file', methods=['POST'])
+def update_github_file():
+    data = request.json
+    file_path = data['file_path']
+    new_content = data['new_content']
+    commit_message = data.get('commit_message', 'Update from Flask app')
+
+    try:
+        file = repo.get_contents(file_path)
+        repo.update_file(file.path, commit_message, new_content, file.sha)
+        return jsonify({"message": "File updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
+@app.route('/test_repo', methods=['GET'])
+def test_repo():
+    try:
+        contents = repo.get_contents("")
+        return jsonify({"files": [file.path for file in contents]}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
